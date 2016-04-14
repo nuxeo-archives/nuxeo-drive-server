@@ -55,7 +55,12 @@ public class DocumentBackedFileItem extends AbstractDocumentBackedFileSystemItem
 
     public DocumentBackedFileItem(VersioningFileSystemItemFactory factory, DocumentModel doc,
             boolean relaxSyncRootConstraint) {
-        super(factory.getName(), doc, relaxSyncRootConstraint);
+        this(factory, doc, relaxSyncRootConstraint, true);
+    }
+
+    public DocumentBackedFileItem(VersioningFileSystemItemFactory factory, DocumentModel doc,
+            boolean relaxSyncRootConstraint, boolean getLockInfo) {
+        super(factory.getName(), doc, relaxSyncRootConstraint, getLockInfo);
         initialize(factory, doc);
     }
 
@@ -65,7 +70,12 @@ public class DocumentBackedFileItem extends AbstractDocumentBackedFileSystemItem
 
     public DocumentBackedFileItem(VersioningFileSystemItemFactory factory, FolderItem parentItem, DocumentModel doc,
             boolean relaxSyncRootConstraint) {
-        super(factory.getName(), parentItem, doc, relaxSyncRootConstraint);
+        this(factory, parentItem, doc, relaxSyncRootConstraint, true);
+    }
+
+    public DocumentBackedFileItem(VersioningFileSystemItemFactory factory, FolderItem parentItem, DocumentModel doc,
+            boolean relaxSyncRootConstraint, boolean getLockInfo) {
+        super(factory.getName(), parentItem, doc, relaxSyncRootConstraint, getLockInfo);
         initialize(factory, doc);
     }
 
@@ -206,7 +216,8 @@ public class DocumentBackedFileItem extends AbstractDocumentBackedFileSystemItem
         DownloadService downloadService = Framework.getService(DownloadService.class);
         // Remove chars that are invalid in filesystem names
         String escapedFilename = name.replaceAll("(/|\\\\|\\*|<|>|\\?|\"|:|\\|)", "-");
-        downloadURL = downloadService.getDownloadUrl(repositoryName, docId, DownloadService.BLOBHOLDER_0, escapedFilename);
+        downloadURL = downloadService.getDownloadUrl(repositoryName, docId, DownloadService.BLOBHOLDER_0,
+                escapedFilename);
     }
 
     protected void updateDigest(Blob blob) {

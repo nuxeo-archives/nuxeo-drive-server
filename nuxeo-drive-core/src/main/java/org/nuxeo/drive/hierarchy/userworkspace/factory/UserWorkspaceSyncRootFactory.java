@@ -56,16 +56,16 @@ public class UserWorkspaceSyncRootFactory extends AbstractSyncRootFolderItemFact
 
     @Override
     protected FileSystemItem adaptDocument(DocumentModel doc, boolean forceParentItem, FolderItem parentItem,
-            boolean relaxSyncRootConstraint) {
-        return new DefaultSyncRootFolderItem(name, parentItem, doc, relaxSyncRootConstraint);
+            boolean relaxSyncRootConstraint, boolean getLockInfo) {
+        return new DefaultSyncRootFolderItem(name, parentItem, doc, relaxSyncRootConstraint, getLockInfo);
     }
 
     /*------------------ AbstractSyncRootFolderItemFactory ------------------*/
     @Override
     protected FolderItem getParentItem(DocumentModel doc) {
         Principal principal = doc.getCoreSession().getPrincipal();
-        FolderItem parent = getFileSystemAdapterService().getVirtualFolderItemFactory(syncRootParentFactoryName).getVirtualFolderItem(
-                principal);
+        FolderItem parent = getFileSystemAdapterService().getVirtualFolderItemFactory(syncRootParentFactoryName)
+                                                         .getVirtualFolderItem(principal);
         if (parent == null) {
             throw new NuxeoException(String.format(
                     "Cannot find the parent of document %s: virtual folder from factory %s.", doc.getId(),

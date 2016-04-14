@@ -131,7 +131,7 @@ public abstract class AbstractSyncRootFolderItemFactory extends AbstractFileSyst
     }
 
     /**
-     * Force parent id using {@link #getParentId(String)}.
+     * Force parent using {@link #getParentItem(DocumentModel)}.
      */
     @Override
     public FileSystemItem getFileSystemItem(DocumentModel doc, boolean includeDeleted) {
@@ -139,11 +139,20 @@ public abstract class AbstractSyncRootFolderItemFactory extends AbstractFileSyst
     }
 
     /**
-     * Force parent id using {@link #getParentId(String)}.
+     * Force parent using {@link #getParentItem(DocumentModel)}.
      */
     @Override
     public FileSystemItem getFileSystemItem(DocumentModel doc, boolean includeDeleted, boolean relaxSyncRootConstraint) {
         return getFileSystemItem(doc, getParentItem(doc), includeDeleted, relaxSyncRootConstraint);
+    }
+
+    /**
+     * Force parent using {@link #getParentItem(DocumentModel)}.
+     */
+    @Override
+    public FileSystemItem getFileSystemItem(DocumentModel doc, boolean includeDeleted, boolean relaxSyncRootConstraint,
+            boolean getLockInfo) {
+        return getFileSystemItem(doc, getParentItem(doc), includeDeleted, relaxSyncRootConstraint, getLockInfo);
     }
 
 }

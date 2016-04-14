@@ -24,6 +24,7 @@ import org.nuxeo.drive.adapter.FolderItem;
 import org.nuxeo.drive.service.impl.AbstractFileSystemItemFactory;
 import org.nuxeo.drive.service.impl.DefaultFileSystemItemFactory;
 import org.nuxeo.ecm.core.api.DocumentModel;
+import org.nuxeo.ecm.core.api.Lock;
 
 /**
  * Interface for the classes contributed to the {@code fileSystemItemFactory} extension point of the
@@ -96,7 +97,7 @@ public interface FileSystemItemFactory {
      *
      * @return the {@link FileSystemItem} or null if the {@link DocumentModel} is not adaptable as a
      *         {@link FileSystemItem}
-     * @see #isFileSystemItem(DocumentModel, boolean))
+     * @see #isFileSystemItem(DocumentModel, boolean)
      */
     FileSystemItem getFileSystemItem(DocumentModel doc, boolean includeDeleted);
 
@@ -111,33 +112,54 @@ public interface FileSystemItemFactory {
      *
      * @return the {@link FileSystemItem} or null if the {@link DocumentModel} is not adaptable as a
      *         {@link FileSystemItem}
-     * @see #isFileSystemItem(DocumentModel, boolean, boolean))
+     * @see #isFileSystemItem(DocumentModel, boolean, boolean)
      */
     FileSystemItem getFileSystemItem(DocumentModel doc, boolean includeDeleted, boolean relaxSyncRootConstraint);
 
     /**
-     * Gets the {@link FileSystemItem} for the given {@link DocumentModel} forcing its parent id with the given id.
+     * Gets the {@link FileSystemItem} for the given {@link DocumentModel}.
+     * <p>
+     * If {@code includeDeleted} is true no filter is applied on the "deleted" life cycle state, else if the document is
+     * in this state it is not considered as adaptable as a {@link FileSystemItem}, thus the method returns null.
+     * <p>
+     * If {@code relaxSyncRootConstraint} is true no filter is applied on the synchronization root aspect for the
+     * current user.
+     * <p>
+     * If {@code getLockInfo} is true the {@link Lock} is fetched from the {@link DocumentModel} and set on the returned
+     * {@link FileSystemItem}.
+     *
+     * @since 8.3
+     * @return the {@link FileSystemItem} or null if the {@link DocumentModel} is not adaptable as a
+     *         {@link FileSystemItem}
+     * @see #isFileSystemItem(DocumentModel, boolean, boolean)
+     */
+    FileSystemItem getFileSystemItem(DocumentModel doc, boolean includeDeleted, boolean relaxSyncRootConstraint,
+            boolean getLockInfo);
+
+    /**
+     * Gets the {@link FileSystemItem} for the given {@link DocumentModel} forcing its parent with the given
+     * {@code parentItem}.
      *
      * @return the {@link FileSystemItem} or null if the {@link DocumentModel} is not adaptable as a
      *         {@link FileSystemItem}
-     * @see #isFileSystemItem(DocumentModel)
-     * @see #getFileSystemItem(DocumentModel, String, boolean)
+     * @see #getFileSystemItem(DocumentModel, FolderItem, boolean)
      */
     FileSystemItem getFileSystemItem(DocumentModel doc, FolderItem parentItem);
 
     /**
-     * Gets the {@link FileSystemItem} for the given {@link DocumentModel} forcing its parent id with the given id. If
-     * {@code includeDeleted} is true no filter is applied on the "deleted" life cycle state, else if the document is in
-     * this state it is not considered as adaptable as a {@link FileSystemItem}, thus the method returns null.
+     * Gets the {@link FileSystemItem} for the given {@link DocumentModel} forcing its parent with the given
+     * {@code parentItem}. If {@code includeDeleted} is true no filter is applied on the "deleted" life cycle state,
+     * else if the document is in this state it is not considered as adaptable as a {@link FileSystemItem}, thus the
+     * method returns null.
      *
      * @return the {@link FileSystemItem} or null if the {@link DocumentModel} is not adaptable as a
      *         {@link FileSystemItem}
-     * @see #isFileSystemItem(DocumentModel, boolean)
      */
     FileSystemItem getFileSystemItem(DocumentModel doc, FolderItem parentItem, boolean includeDeleted);
 
     /**
-     * Gets the {@link FileSystemItem} for the given {@link DocumentModel} forcing its parent id with the given id.
+     * Gets the {@link FileSystemItem} for the given {@link DocumentModel} forcing its parent with the given
+     * {@code parentItem}.
      * <p>
      * If {@code includeDeleted} is true no filter is applied on the "deleted" life cycle state, else if the document is
      * in this state it is not considered as adaptable as a {@link FileSystemItem}, thus the method returns null.
@@ -147,10 +169,29 @@ public interface FileSystemItemFactory {
      *
      * @return the {@link FileSystemItem} or null if the {@link DocumentModel} is not adaptable as a
      *         {@link FileSystemItem}
-     * @see #isFileSystemItem(DocumentModel, boolean, boolean)
      */
     FileSystemItem getFileSystemItem(DocumentModel doc, FolderItem parentItem, boolean includeDeleted,
             boolean relaxSyncRootConstraint);
+
+    /**
+     * Gets the {@link FileSystemItem} for the given {@link DocumentModel} forcing its parent with the given
+     * {@code parentItem}.
+     * <p>
+     * If {@code includeDeleted} is true no filter is applied on the "deleted" life cycle state, else if the document is
+     * in this state it is not considered as adaptable as a {@link FileSystemItem}, thus the method returns null.
+     * <p>
+     * If {@code relaxSyncRootConstraint} is true no filter is applied on the synchronization root aspect for the
+     * current user.
+     * <p>
+     * If {@code getLockInfo} is true the {@link Lock} is fetched from the {@link DocumentModel} and set on the returned
+     * {@link FileSystemItem}.
+     *
+     * @since 8.3
+     * @return the {@link FileSystemItem} or null if the {@link DocumentModel} is not adaptable as a
+     *         {@link FileSystemItem}
+     */
+    FileSystemItem getFileSystemItem(DocumentModel doc, FolderItem parentItem, boolean includeDeleted,
+            boolean relaxSyncRootConstraint, boolean getLockInfo);
 
     /**
      * Returns true if the given {@link FileSystemItem} id can be handled by this factory. It is typically the case when

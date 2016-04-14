@@ -56,7 +56,12 @@ public class UserSyncRootParentFolderItem extends DocumentBackedFolderItem {
 
     public UserSyncRootParentFolderItem(String factoryName, DocumentModel doc, FolderItem parentItem,
             String folderName, boolean relaxSyncRootConstraint) {
-        super(factoryName, parentItem, doc, relaxSyncRootConstraint);
+        this(factoryName, doc, parentItem, folderName, relaxSyncRootConstraint, true);
+    }
+
+    public UserSyncRootParentFolderItem(String factoryName, DocumentModel doc, FolderItem parentItem,
+            String folderName, boolean relaxSyncRootConstraint, boolean getLockInfo) {
+        super(factoryName, parentItem, doc, relaxSyncRootConstraint, getLockInfo);
         name = folderName;
         canRename = false;
         canDelete = false;
@@ -115,7 +120,9 @@ public class UserSyncRootParentFolderItem extends DocumentBackedFolderItem {
                         // NuxeoDriveManager#getSynchronizationRoots(Principal
                         // principal)
                         if (session.getPrincipal().getName().equals(doc.getPropertyValue("dc:creator"))) {
-                            FileSystemItem child = getFileSystemItemAdapterService().getFileSystemItem(doc, this);
+                            // NXP-19442: Avoid useless and costly call to DocumentModel#getLockInfo
+                            FileSystemItem child = getFileSystemItemAdapterService().getFileSystemItem(doc, this,
+                                    false, false, false);
                             if (child == null) {
                                 if (log.isDebugEnabled()) {
                                     log.debug(String.format(
