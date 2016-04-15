@@ -43,7 +43,7 @@ import org.nuxeo.runtime.api.Framework;
 
 /**
  * {@link DocumentModel} backed implementation of a {@link FileSystemItem}.
- * 
+ *
  * @author Antoine Taillefer
  * @see DocumentBackedFileItem
  * @see DocumentBackedFolderItem
@@ -69,7 +69,12 @@ public abstract class AbstractDocumentBackedFileSystemItem extends AbstractFileS
 
     protected AbstractDocumentBackedFileSystemItem(String factoryName, DocumentModel doc,
             boolean relaxSyncRootConstraint) throws ClientException {
-        this(factoryName, null, doc, relaxSyncRootConstraint);
+        this(factoryName, doc, relaxSyncRootConstraint, true);
+    }
+
+    protected AbstractDocumentBackedFileSystemItem(String factoryName, DocumentModel doc,
+            boolean relaxSyncRootConstraint, boolean getLockInfo) throws ClientException {
+        this(factoryName, null, doc, relaxSyncRootConstraint, getLockInfo);
         CoreSession docSession = doc.getCoreSession();
         DocumentModel parentDoc = null;
         try {
@@ -92,7 +97,7 @@ public abstract class AbstractDocumentBackedFileSystemItem extends AbstractFileS
                 throw new RootlessItemException();
             } else {
                 FileSystemItem parent = getFileSystemItemAdapterService().getFileSystemItem(parentDoc, true,
-                        relaxSyncRootConstraint);
+                        relaxSyncRootConstraint, getLockInfo);
                 if (parent == null) {
                     log.trace("We reached a document for which the parent document cannot be  adapted to a (possibly virtual) descendant of the top level folder item."
                             + " Let's raise a marker exception and let the caller give more information on the source document.");
@@ -103,13 +108,14 @@ public abstract class AbstractDocumentBackedFileSystemItem extends AbstractFileS
             }
         } catch (RootlessItemException e) {
             log.trace("Let's try to adapt the document as a member of a collection sync root, if not the case let's raise a marker exception and let the caller give more information on the source document.");
-            if (!handleCollectionMember(doc, docSession, relaxSyncRootConstraint)) {
+            if (!handleCollectionMember(doc, docSession, relaxSyncRootConstraint, getLockInfo)) {
                 throw new RootlessItemException();
             }
         }
     }
 
-    protected boolean handleCollectionMember(DocumentModel doc, CoreSession session, boolean relaxSyncRootConstraint) {
+    protected boolean handleCollectionMember(DocumentModel doc, CoreSession session, boolean relaxSyncRootConstraint,
+            boolean getLockInfo) {
         if (!doc.hasSchema(CollectionConstants.COLLECTION_MEMBER_SCHEMA_NAME)) {
             return false;
         }
@@ -127,7 +133,8 @@ public abstract class AbstractDocumentBackedFileSystemItem extends AbstractFileS
             Iterator<DocumentModel> it = docCollections.iterator();
             while (it.hasNext() && parent == null) {
                 collection = it.next();
-                parent = getFileSystemItemAdapterService().getFileSystemItem(collection, true, relaxSyncRootConstraint);
+                parent = getFileSystemItemAdapterService().getFileSystemItem(collection, true, relaxSyncRootConstraint,
+                        getLockInfo);
             }
             if (parent == null) {
                 if (log.isTraceEnabled()) {
@@ -151,6 +158,11 @@ public abstract class AbstractDocumentBackedFileSystemItem extends AbstractFileS
 
     protected AbstractDocumentBackedFileSystemItem(String factoryName, FolderItem parentItem, DocumentModel doc,
             boolean relaxSyncRootConstraint) throws ClientException {
+        this(factoryName, parentItem, doc, relaxSyncRootConstraint, true);
+    }
+
+    protected AbstractDocumentBackedFileSystemItem(String factoryName, FolderItem parentItem, DocumentModel doc,
+            boolean relaxSyncRootConstraint, boolean getLockInfo) throws ClientException {
 
         super(factoryName, doc.getCoreSession().getPrincipal(), relaxSyncRootConstraint);
 
@@ -171,7 +183,9 @@ public abstract class AbstractDocumentBackedFileSystemItem extends AbstractFileS
         DocumentRef parentRef = doc.getParentRef();
         canDelete = docSession.hasPermission(doc.getRef(), SecurityConstants.REMOVE)
                 && (parentRef == null || docSession.hasPermission(parentRef, SecurityConstants.REMOVE_CHILDREN));
-        lockInfo = doc.getLockInfo();
+        if (getLockInfo) {
+            lockInfo = doc.getLockInfo();
+        }
 
         String parentPath;
         if (parentItem != null) {

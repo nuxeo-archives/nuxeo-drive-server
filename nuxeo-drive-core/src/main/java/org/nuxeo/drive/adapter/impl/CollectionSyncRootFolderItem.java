@@ -37,7 +37,7 @@ import org.nuxeo.runtime.api.Framework;
 
 /**
  * Default implementation of a collection synchronization root {@link FolderItem}.
- * 
+ *
  * @author Antoine Taillefer
  * @since 6.0
  */
@@ -52,7 +52,12 @@ public class CollectionSyncRootFolderItem extends DefaultSyncRootFolderItem impl
 
     public CollectionSyncRootFolderItem(String factoryName, FolderItem parentItem, DocumentModel doc,
             boolean relaxSyncRootConstraint) throws ClientException {
-        super(factoryName, parentItem, doc, relaxSyncRootConstraint);
+        this(factoryName, parentItem, doc, relaxSyncRootConstraint, true);
+    }
+
+    public CollectionSyncRootFolderItem(String factoryName, FolderItem parentItem, DocumentModel doc,
+            boolean relaxSyncRootConstraint, boolean getLockInfo) throws ClientException {
+        super(factoryName, parentItem, doc, relaxSyncRootConstraint, getLockInfo);
     }
 
     protected CollectionSyncRootFolderItem() {
@@ -72,7 +77,9 @@ public class CollectionSyncRootFolderItem extends DefaultSyncRootFolderItem impl
 
         List<FileSystemItem> children = new ArrayList<FileSystemItem>(dmChildren.size());
         for (DocumentModel dmChild : dmChildren) {
-            FileSystemItem child = getFileSystemItemAdapterService().getFileSystemItem(dmChild, this);
+            // NXP-19442: Avoid useless and costly call to DocumentModel#getLockInfo
+            FileSystemItem child = getFileSystemItemAdapterService().getFileSystemItem(dmChild, this, false, false,
+                    false);
             if (child != null) {
                 children.add(child);
             }

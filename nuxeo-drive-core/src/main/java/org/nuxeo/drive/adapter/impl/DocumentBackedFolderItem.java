@@ -39,7 +39,7 @@ import org.nuxeo.runtime.api.Framework;
 
 /**
  * {@link DocumentModel} backed implementation of a {@link FolderItem}.
- * 
+ *
  * @author Antoine Taillefer
  */
 public class DocumentBackedFolderItem extends AbstractDocumentBackedFileSystemItem implements FolderItem {
@@ -56,7 +56,12 @@ public class DocumentBackedFolderItem extends AbstractDocumentBackedFileSystemIt
 
     public DocumentBackedFolderItem(String factoryName, DocumentModel doc, boolean relaxSyncRootConstraint)
             throws ClientException {
-        super(factoryName, doc, relaxSyncRootConstraint);
+        this(factoryName, doc, relaxSyncRootConstraint, true);
+    }
+
+    public DocumentBackedFolderItem(String factoryName, DocumentModel doc, boolean relaxSyncRootConstraint,
+            boolean getLockInfo) throws ClientException {
+        super(factoryName, doc, relaxSyncRootConstraint, getLockInfo);
         initialize(doc);
     }
 
@@ -67,7 +72,12 @@ public class DocumentBackedFolderItem extends AbstractDocumentBackedFileSystemIt
 
     public DocumentBackedFolderItem(String factoryName, FolderItem parentItem, DocumentModel doc,
             boolean relaxSyncRootConstraint) throws ClientException {
-        super(factoryName, parentItem, doc, relaxSyncRootConstraint);
+        this(factoryName, parentItem, doc, relaxSyncRootConstraint, true);
+    }
+
+    public DocumentBackedFolderItem(String factoryName, FolderItem parentItem, DocumentModel doc,
+            boolean relaxSyncRootConstraint, boolean getLockInfo) throws ClientException {
+        super(factoryName, parentItem, doc, relaxSyncRootConstraint, getLockInfo);
         initialize(doc);
     }
 
@@ -110,7 +120,9 @@ public class DocumentBackedFolderItem extends AbstractDocumentBackedFileSystemIt
         while (nbChildren < pageSize && hasNextPage) {
             List<DocumentModel> dmChildren = childrenPageProvider.getCurrentPage();
             for (DocumentModel dmChild : dmChildren) {
-                FileSystemItem child = getFileSystemItemAdapterService().getFileSystemItem(dmChild, this);
+                // NXP-19442: Avoid useless and costly call to DocumentModel#getLockInfo
+                FileSystemItem child = getFileSystemItemAdapterService().getFileSystemItem(dmChild, this, false,
+                        false, false);
                 if (child != null) {
                     children.add(child);
                     nbChildren++;

@@ -32,7 +32,7 @@ import org.nuxeo.runtime.api.Framework;
 
 /**
  * User workspace based implementation of {@link FileSystemItemFactory} for a synchronization root {@link FolderItem}.
- * 
+ *
  * @author Antoine Taillefer
  */
 public class UserWorkspaceSyncRootFactory extends AbstractSyncRootFolderItemFactory {
@@ -56,16 +56,16 @@ public class UserWorkspaceSyncRootFactory extends AbstractSyncRootFolderItemFact
 
     @Override
     protected FileSystemItem adaptDocument(DocumentModel doc, boolean forceParentItem, FolderItem parentItem,
-            boolean relaxSyncRootConstraint) throws ClientException {
-        return new DefaultSyncRootFolderItem(name, parentItem, doc, relaxSyncRootConstraint);
+            boolean relaxSyncRootConstraint, boolean getLockInfo) throws ClientException {
+        return new DefaultSyncRootFolderItem(name, parentItem, doc, relaxSyncRootConstraint, getLockInfo);
     }
 
     /*------------------ AbstractSyncRootFolderItemFactory ------------------*/
     @Override
     protected FolderItem getParentItem(DocumentModel doc) throws ClientException {
         Principal principal = doc.getCoreSession().getPrincipal();
-        FolderItem parent = getFileSystemAdapterService().getVirtualFolderItemFactory(syncRootParentFactoryName).getVirtualFolderItem(
-                principal);
+        FolderItem parent = getFileSystemAdapterService().getVirtualFolderItemFactory(syncRootParentFactoryName)
+                                                         .getVirtualFolderItem(principal);
         if (parent == null) {
             throw new ClientException(String.format(
                     "Cannot find the parent of document %s: virtual folder from factory %s.", doc.getId(),
