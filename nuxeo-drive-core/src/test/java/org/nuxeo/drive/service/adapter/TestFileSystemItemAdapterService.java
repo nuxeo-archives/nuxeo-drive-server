@@ -426,7 +426,6 @@ public class TestFileSystemItemAdapterService {
     }
 
     @Test
-    @LocalDeploy("org.nuxeo.drive.core.test:OSGI-INF/test-nuxeodrive-adapter-service-contrib-override.xml")
     public void testContribOverride() throws Exception {
         assumeFalse("Cannot test reload for in-memory repository", coreFeature.getStorageConfiguration().isDBSMem());
 
