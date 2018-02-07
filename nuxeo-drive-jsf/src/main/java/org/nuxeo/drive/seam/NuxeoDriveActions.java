@@ -56,7 +56,6 @@ import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.DocumentModelList;
 import org.nuxeo.ecm.core.api.DocumentRef;
 import org.nuxeo.ecm.core.api.IdRef;
-import org.nuxeo.ecm.core.api.LifeCycleConstants;
 import org.nuxeo.ecm.core.api.NuxeoException;
 import org.nuxeo.ecm.core.api.blobholder.BlobHolder;
 import org.nuxeo.ecm.core.api.impl.DocumentModelListImpl;
@@ -291,7 +290,7 @@ public class NuxeoDriveActions extends InputController implements Serializable {
         if (currentDocument == null) {
             return false;
         }
-        if (LifeCycleConstants.DELETED_STATE.equals(currentDocument.getCurrentLifeCycleState())) {
+        if (currentDocument.isTrashed()) {
             return false;
         }
         DocumentRef currentDocRef = currentDocument.getRef();
@@ -411,13 +410,7 @@ public class NuxeoDriveActions extends InputController implements Serializable {
     }
 
     protected boolean isSyncRootCandidate(DocumentModel doc) {
-        if (!doc.isFolder()) {
-            return false;
-        }
-        if (LifeCycleConstants.DELETED_STATE.equals(doc.getCurrentLifeCycleState())) {
-            return false;
-        }
-        return true;
+        return doc.isFolder() && !doc.isTrashed();
     }
 
     protected FileSystemItem getFileSystemItem(DocumentModel doc) {
