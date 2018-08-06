@@ -13,12 +13,16 @@ if (token == null) {
 }
 String userName = request.getUserPrincipal().getName();
 String updateToken = request.getParameter("updateToken");
+Boolean useProtocol = Boolean.parseBoolean(request.getParameter("useProtocol"));
 %>
 <html>
   <head>
     <title>Nuxeo Drive startup page</title>
     <script type="text/javascript">
-      <% if (updateToken == null) { %>
+      location.replace(location.href + '#token=<%= token %>');
+      <% if (useProtocol) { %>
+      location.replace('nxdrive://token/<%= token %>');
+      <% } else if (updateToken == null) { %>
       drive.create_account('<%= userName %>', '<%= token %>');
       <% } else { %>
       drive.update_token('<%= token %>');
