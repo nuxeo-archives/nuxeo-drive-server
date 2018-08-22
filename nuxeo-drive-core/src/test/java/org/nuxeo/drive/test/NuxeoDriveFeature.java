@@ -34,6 +34,7 @@ import org.nuxeo.runtime.test.runner.RunnerFeature;
 @Deploy("org.nuxeo.ecm.platform.filemanager.core")
 @Deploy("org.nuxeo.ecm.platform.webapp.types")
 @Deploy("org.nuxeo.ecm.platform.tag")
+@Deploy("org.nuxeo.ecm.platform.collections.core:OSGI-INF/collection-core-types-contrib.xml")
 @Deploy("org.nuxeo.drive.core:OSGI-INF/test-nuxeodrive-sync-root-cache-contrib.xml")
 @Deploy("org.nuxeo.drive.core:OSGI-INF/test-nuxeodrive-types-contrib.xml")
 @Deploy("org.nuxeo.drive.core:OSGI-INF/test-nuxeodrive-descendants-scrolling-cache-contrib.xml")
