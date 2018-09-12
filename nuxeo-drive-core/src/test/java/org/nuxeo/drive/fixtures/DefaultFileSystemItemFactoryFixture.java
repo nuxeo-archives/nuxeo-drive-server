@@ -139,6 +139,8 @@ public class DefaultFileSystemItemFactoryFixture {
 
     protected FileSystemItemFactory defaultFileSystemItemFactory;
 
+    protected FileSystemItemFactory defaultSyncRootFolderItemFactory;
+
     @Before
     public void createTestDocs() throws Exception {
         principal = session.getPrincipal();
@@ -189,8 +191,12 @@ public class DefaultFileSystemItemFactoryFixture {
         session.save();
 
         // Get default file system item factory
-        defaultFileSystemItemFactory = ((FileSystemItemAdapterServiceImpl) fileSystemItemAdapterService).getFileSystemItemFactory(
+        FileSystemItemAdapterServiceImpl fileSystemItemAdapterServiceImpl = (FileSystemItemAdapterServiceImpl) fileSystemItemAdapterService;
+        defaultFileSystemItemFactory = fileSystemItemAdapterServiceImpl.getFileSystemItemFactory(
                 "defaultFileSystemItemFactory");
+        // Get the default sync root folder item factory
+        defaultSyncRootFolderItemFactory = fileSystemItemAdapterServiceImpl.getFileSystemItemFactory(
+                "defaultSyncRootFolderItemFactory");
     }
 
     @Test
@@ -861,8 +867,6 @@ public class DefaultFileSystemItemFactoryFixture {
         // defaultSyncRootFolderItemFactory
         DocumentModel section = session.createDocument(session.createDocumentModel("/", "sectionSyncRoot", "Section"));
         nuxeoDriveManager.registerSynchronizationRoot(principal, section, session);
-        FileSystemItemFactory defaultSyncRootFolderItemFactory = ((FileSystemItemAdapterServiceImpl) fileSystemItemAdapterService).getFileSystemItemFactory(
-                "defaultSyncRootFolderItemFactory");
         FolderItem sectionItem = (FolderItem) defaultSyncRootFolderItemFactory.getFileSystemItem(section);
         assertNotNull(sectionItem);
         assertFalse(sectionItem.getCanCreateChild());
@@ -911,8 +915,6 @@ public class DefaultFileSystemItemFactoryFixture {
             // Check that the lock info is not fetched for FileSystemItem
             // adaptation when calling getChildren or
             // scrollDescendants
-            FileSystemItemFactory defaultSyncRootFolderItemFactory = ((FileSystemItemAdapterServiceImpl) fileSystemItemAdapterService).getFileSystemItemFactory(
-                    "defaultSyncRootFolderItemFactory");
             FolderItem syncRootFolderItem = (FolderItem) defaultSyncRootFolderItemFactory.getFileSystemItem(
                     syncRootFolder);
             List<FileSystemItem> children = syncRootFolderItem.getChildren();
@@ -970,8 +972,6 @@ public class DefaultFileSystemItemFactoryFixture {
         assumeFalse("Cannot test reload for in-memory repository", coreFeature.getStorageConfiguration().isDBSMem());
 
         nuxeoDriveManager.registerSynchronizationRoot(session.getPrincipal(), syncRootFolder, session);
-        FileSystemItemFactory defaultSyncRootFolderItemFactory = ((FileSystemItemAdapterServiceImpl) fileSystemItemAdapterService).getFileSystemItemFactory(
-                "defaultSyncRootFolderItemFactory");
         FolderItem syncRootFolderItem = (FolderItem) defaultSyncRootFolderItemFactory.getFileSystemItem(syncRootFolder);
         assertEquals(5, syncRootFolderItem.getChildren().size());
 
@@ -1043,8 +1043,6 @@ public class DefaultFileSystemItemFactoryFixture {
         log.trace(
                 "Scroll through the descendants of \"/default-domain/UserWorkspaces/Administrator\", expecting one: \"testFolder\", "
                         + "the \"Collections\" folder and its descendants being ignored");
-        FileSystemItemFactory defaultSyncRootFolderItemFactory = ((FileSystemItemAdapterServiceImpl) fileSystemItemAdapterService).getFileSystemItemFactory(
-                "defaultSyncRootFolderItemFactory");
         FolderItem userWorkspaceFolderItem = (FolderItem) defaultSyncRootFolderItemFactory.getFileSystemItem(
                 userWorkspace);
         ScrollFileSystemItemList descendants = userWorkspaceFolderItem.scrollDescendants(null, 10, 1000);
@@ -1052,6 +1050,69 @@ public class DefaultFileSystemItemFactoryFixture {
         FileSystemItem descendant = descendants.get(0);
         assertTrue(descendant.isFolder());
         assertEquals("testFolder", descendant.getName());
+    }
+
+    /**
+     * Tests the following hierarchy:
+     *
+     * <pre>
+     * syncRoot             Synchronization root for joe with Read access
+     * |-- folder           Blocked inheritance
+     * |   |-- placeless    Read access for joe (placeless document)
+     * |
+     * |-- descendant1      Read access for joe (inheritance)
+     * |-- descendant2      Read access for joe (inheritance)
+     * |-- ...              Read access for joe (inheritance)
+     * </pre>
+     *
+     * syncRoot should be synchronized with its directly accessible descendants to obtain the following hierarchy
+     * client-side:
+     *
+     * <pre>
+     * syncRoot
+     * |-- descendant1
+     * |-- descendant2
+     * |-- ...
+     * </pre>
+     *
+     * The placeless document will not be synchronized.
+     *
+     * @since 10.3
+     */
+    @Test
+    public void testScrollDescendantsWithBlockedInheritance() {
+        log.trace("Create \"placelessDocument\" in \"/syncRoot/folder\"");
+        DocumentModel placeless = session.createDocumentModel(folder.getPathAsString(), "placeless", "File");
+        Blob blob = new StringBlob("This is a placeless file for joe.");
+        blob.setFilename("Placeless.odt");
+        placeless.setPropertyValue("file:content", (Serializable) blob);
+        session.createDocument(placeless);
+
+        log.trace(
+                "Set permissions for joe: Read on \"syncRoot\", Blocked inheritance on \"folder\", Read on \"placeless\"");
+        setPermission(syncRootFolder, "joe", SecurityConstants.READ, true);
+        setPermission(folder, ACE.BLOCK);
+        setPermission(placeless, "joe", SecurityConstants.READ, true);
+
+        // Under Oracle, the READ ACL optims are not visible from the joe
+        // session while the transaction has not been committed.
+        TransactionHelper.commitOrRollbackTransaction();
+        TransactionHelper.startTransaction();
+
+        try (CloseableCoreSession joeSession = coreFeature.openCoreSession("joe")) {
+            log.trace("Register \"/syncRoot\" as a synchronization root for joe");
+            nuxeoDriveManager.registerSynchronizationRoot(joeSession.getPrincipal(), syncRootFolder, session);
+
+            log.trace(
+                    "Scroll through the descendants of \"/syncRoot\", expecting its 4 directly accessible descendants, "
+                            + "the blocked \"folder\" and its descendants being ignored");
+            syncRootFolder = joeSession.getDocument(syncRootFolder.getRef());
+            FolderItem syncRootFolderItem = (FolderItem) defaultSyncRootFolderItemFactory.getFileSystemItem(
+                    syncRootFolder);
+            ScrollFileSystemItemList descendants = syncRootFolderItem.scrollDescendants(null, 10, 1000);
+            assertEquals(4, descendants.size());
+        }
+        resetPermissions(syncRootFolder, "joe");
     }
 
     @Test
@@ -1079,9 +1140,13 @@ public class DefaultFileSystemItemFactoryFixture {
     }
 
     protected void setPermission(DocumentModel doc, String userName, String permission, boolean isGranted) {
+        setPermission(doc, new ACE(userName, permission, isGranted));
+    }
+
+    protected void setPermission(DocumentModel doc, ACE ace) {
         ACP acp = session.getACP(doc.getRef());
         ACL localACL = acp.getOrCreateACL(ACL.LOCAL_ACL);
-        localACL.add(new ACE(userName, permission, isGranted));
+        localACL.add(ace);
         session.setACP(doc.getRef(), acp, true);
         session.save();
     }
