@@ -63,6 +63,7 @@ import org.nuxeo.ecm.core.api.security.ACE;
 import org.nuxeo.ecm.core.api.security.ACL;
 import org.nuxeo.ecm.core.api.security.ACP;
 import org.nuxeo.ecm.core.api.security.SecurityConstants;
+import org.nuxeo.ecm.core.bulk.CoreBulkFeature;
 import org.nuxeo.ecm.core.test.CoreFeature;
 import org.nuxeo.ecm.core.trash.TrashService;
 import org.nuxeo.ecm.directory.api.DirectoryService;
@@ -83,7 +84,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @author Antoine Taillefer
  */
 @RunWith(FeaturesRunner.class)
-@Features(NuxeoDriveAutomationFeature.class)
+@Features({ NuxeoDriveAutomationFeature.class, CoreBulkFeature.class })
 @ServletContainer(port = 18080)
 public class TestFileSystemItemOperations {
 
@@ -930,7 +931,7 @@ public class TestFileSystemItemOperations {
 
     protected NuxeoPrincipal createUser(String userName, String password, String firstName, String lastName) {
         try (org.nuxeo.ecm.directory.Session userDir = directoryService.open("userDirectory")) {
-            Map<String, Object> user = new HashMap<String, Object>();
+            Map<String, Object> user = new HashMap<>();
             user.put("username", userName);
             user.put("password", password);
             user.put("firstName", firstName);

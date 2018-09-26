@@ -55,6 +55,7 @@ import org.nuxeo.ecm.core.api.security.ACE;
 import org.nuxeo.ecm.core.api.security.ACL;
 import org.nuxeo.ecm.core.api.security.ACP;
 import org.nuxeo.ecm.core.api.security.SecurityConstants;
+import org.nuxeo.ecm.core.bulk.CoreBulkFeature;
 import org.nuxeo.ecm.core.event.EventServiceAdmin;
 import org.nuxeo.ecm.core.test.CoreFeature;
 import org.nuxeo.ecm.core.test.DefaultRepositoryInit;
@@ -76,7 +77,7 @@ import org.nuxeo.runtime.test.runner.TransactionalFeature;
  * @author <a href="mailto:ogrise@nuxeo.com">Olivier Grisel</a>
  */
 @RunWith(FeaturesRunner.class)
-@Features(NuxeoDriveFeature.class)
+@Features({ NuxeoDriveFeature.class, CoreBulkFeature.class })
 @RepositoryConfig(init = DefaultRepositoryInit.class)
 public class TestNuxeoDriveManager {
 
