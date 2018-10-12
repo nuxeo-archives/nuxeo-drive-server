@@ -4,6 +4,7 @@
 <%@ page import="org.nuxeo.ecm.tokenauth.service.TokenAuthenticationService"%>
 <%
 response.setCharacterEncoding("UTF-8");
+response.setContentType("text/html");
 TokenAuthenticationService tokenAuthService = Framework.getService(TokenAuthenticationService.class);
 String token = tokenAuthService.acquireToken(request);
 if (token == null) {
@@ -12,11 +13,7 @@ if (token == null) {
 }
 String userName = request.getUserPrincipal().getName();
 String updateToken = request.getParameter("updateToken");
-String useProtocol = request.getParameter("useProtocol");
-
-// If useProtocol is not in the parameters, we use code supporting the Drive versions pre-Qt5.
-if (useProtocol == null) {
-  response.setContentType("text/html"); %>
+%>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
   <head>
@@ -33,19 +30,4 @@ if (useProtocol == null) {
     <!-- Current user [<%= userName %>] acquired authentication token [<%= token %>] -->
   </body>
 </html>
-<% }
 
-// New login system
-// If the useProtocol parameter is true, this page is opened in the user's browser
-// and the token is passed back to the application with its custom nxdrive protocol URL.
-// If useProtocol is false (for development purposes),this page is opened using
-// WebKit and the resulting JSON is parsed by Drive.
-else if (Boolean.parseBoolean(useProtocol)) {
-  response.sendRedirect("nxdrive://token/" + token + "/user/" + userName);
-} else {
-  response.setContentType("application/json"); %>
-{
-  "username": "<%= userName %>",
-  "token": "<%= token %>"
-}
-<% } %>
