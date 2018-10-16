@@ -20,8 +20,40 @@ String useProtocol = request.getParameter("useProtocol");
 // If useProtocol is false (for development purposes),this page is opened using
 // WebKit and the resulting JSON is parsed by Drive.
 if (Boolean.parseBoolean(useProtocol)) {
-  response.sendRedirect("nxdrive://token/" + token + "/user/" + userName);
-} else {
+  response.setContentType("text/html");
+%>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <title>Nuxeo Drive startup page</title>
+    <script type="text/javascript">
+      setTimeout(() => {
+        window.location.replace("nxdrive://token/<%= token %>/user/<%= userName %>");
+      }, 2500);
+    </script>
+    <style type="text/css">
+      body {
+        font: normal 14px/18pt "Helvetica", Arial, sans-serif;
+      }
+
+      .container {
+        font-weight: 1.3em;
+        width: 80%;
+        left: 10%;
+        position: absolute;
+        top: 45%
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Authentication successful: You'll be redirected to Drive shortly...</h1>
+      <h5>Drive not opening? Click <a href="nxdrive://token/<%= token %>/user/<%= userName %>">here</a> to try and reopen it.</h5>
+      <!-- Current user [<%= userName %>] acquired authentication token [<%= token %>] -->
+    </div>
+  </body>
+</html>
+<% } else {
   response.setContentType("application/json"); %>
 {
   "username": "<%= userName %>",
