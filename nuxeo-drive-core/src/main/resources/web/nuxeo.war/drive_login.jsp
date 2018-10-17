@@ -2,9 +2,8 @@
 <%@ page import="org.nuxeo.runtime.api.Framework"%>
 <%@ page import="org.apache.http.HttpStatus"%>
 <%@ page import="org.nuxeo.ecm.tokenauth.service.TokenAuthenticationService"%>
+<%@ page contentType="text/html; charset=UTF-8"%>
 <%
-response.setCharacterEncoding("UTF-8");
-response.setContentType("text/html");
 TokenAuthenticationService tokenAuthService = Framework.getService(TokenAuthenticationService.class);
 String token = tokenAuthService.acquireToken(request);
 if (token == null) {
