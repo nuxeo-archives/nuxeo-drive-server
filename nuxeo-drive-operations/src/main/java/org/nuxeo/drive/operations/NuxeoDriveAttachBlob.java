@@ -36,13 +36,14 @@ import org.nuxeo.ecm.core.api.blobholder.BlobHolder;
 import org.nuxeo.runtime.api.Framework;
 
 /**
- * Updates the given {@link DocumentModel} with the given blob using the versioning policy of the given
+ * Updates the given {@link DocumentModel} with the input blob using the versioning policy of the given
  * {@link VersioningFileSystemItemFactory}.
  *
  * @author Antoine Taillefer
  * @since 7.4
  */
-@Operation(id = NuxeoDriveAttachBlob.ID, category = Constants.CAT_SERVICES, label = "Nuxeo Drive: Attach blob")
+@Operation(id = NuxeoDriveAttachBlob.ID, category = Constants.CAT_SERVICES, label = "Nuxeo Drive: Attach blob", description = "Update the given document with the input blob." //
+        + " Return the input blob.")
 public class NuxeoDriveAttachBlob {
 
     public static final String ID = "NuxeoDrive.AttachBlob";
@@ -50,7 +51,7 @@ public class NuxeoDriveAttachBlob {
     @Context
     protected CoreSession session;
 
-    @Param(name = "document")
+    @Param(name = "document", description = "The document to update.")
     protected DocumentModel doc;
 
     @Param(name = "applyVersioningPolicy", required = false, values = "false")

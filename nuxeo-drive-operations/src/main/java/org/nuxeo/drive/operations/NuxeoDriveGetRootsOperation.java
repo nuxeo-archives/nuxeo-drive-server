@@ -40,9 +40,9 @@ import org.nuxeo.ecm.core.api.impl.DocumentModelListImpl;
 import org.nuxeo.runtime.api.Framework;
 
 /**
- * Fetch the list of synchronization roots for the currently authenticated user.
+ * Gets the list of synchronization roots for the currently authenticated user.
  */
-@Operation(id = NuxeoDriveGetRootsOperation.ID, category = Constants.CAT_SERVICES, label = "Nuxeo Drive: Get Roots")
+@Operation(id = NuxeoDriveGetRootsOperation.ID, category = Constants.CAT_SERVICES, label = "Nuxeo Drive: Get Roots", description = "Get the list of synchronization roots for the currently authenticated user.")
 public class NuxeoDriveGetRootsOperation {
 
     public static final String ID = "NuxeoDrive.GetRoots";
