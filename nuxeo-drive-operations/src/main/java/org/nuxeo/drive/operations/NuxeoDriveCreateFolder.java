@@ -57,10 +57,8 @@ public class NuxeoDriveCreateFolder {
 
     @OperationMethod
     public Blob run() throws IOException {
-
         FileSystemItemManager fileSystemItemManager = Framework.getLocalService(FileSystemItemManager.class);
         FolderItem folderItem = fileSystemItemManager.createFolder(parentId, name, ctx.getPrincipal(), overwrite);
-
         return NuxeoDriveOperationHelper.asJSONBlob(folderItem);
     }
 

@@ -54,7 +54,6 @@ public class NuxeoDriveGenerateConflictedItemName {
 
     @OperationMethod
     public Blob run() throws IOException {
-
         String extension = "";
         if (name.contains(".")) {
             // Split on the last occurrence of . using a negative lookahead

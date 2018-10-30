@@ -65,7 +65,6 @@ public class NuxeoDriveCreateFile {
 
     @OperationMethod
     public Blob run(Blob blob) throws ParseException, IOException {
-
         FileSystemItemManager fileSystemItemManager = Framework.getLocalService(FileSystemItemManager.class);
         // The filename transfered by the multipart encoding is not preserved
         // correctly if there is non ascii characters in it.
@@ -74,7 +73,6 @@ public class NuxeoDriveCreateFile {
         }
         NuxeoDriveOperationHelper.normalizeMimeTypeAndEncoding(blob);
         FileItem fileItem = fileSystemItemManager.createFile(parentId, blob, ctx.getPrincipal(), overwrite);
-
         return NuxeoDriveOperationHelper.asJSONBlob(fileItem);
     }
 

@@ -45,7 +45,6 @@ public class NuxeoDriveGetTopLevelFolder {
 
     @OperationMethod
     public Blob run() throws IOException {
-
         FileSystemItemManager fileSystemItemManager = Framework.getLocalService(FileSystemItemManager.class);
         FolderItem topLevelFolder = fileSystemItemManager.getTopLevelFolder(ctx.getPrincipal());
         return NuxeoDriveOperationHelper.asJSONBlob(topLevelFolder);
