@@ -50,8 +50,10 @@ public class NuxeoDriveSetVersioningOptions {
     @OperationMethod
     public void run() {
         NuxeoDriveIntegrationTestsHelper.checkOperationAllowed();
-        FileSystemItemAdapterService fileSystemItemAdapterService = Framework.getLocalService(FileSystemItemAdapterService.class);
-        VersioningFileSystemItemFactory defaultFileSystemItemFactory = (VersioningFileSystemItemFactory) ((FileSystemItemAdapterServiceImpl) fileSystemItemAdapterService).getFileSystemItemFactory("defaultFileSystemItemFactory");
+        FileSystemItemAdapterService fileSystemItemAdapterService = Framework.getLocalService(
+                FileSystemItemAdapterService.class);
+        VersioningFileSystemItemFactory defaultFileSystemItemFactory = (VersioningFileSystemItemFactory) ((FileSystemItemAdapterServiceImpl) fileSystemItemAdapterService).getFileSystemItemFactory(
+                "defaultFileSystemItemFactory");
         if (delay != null) {
             defaultFileSystemItemFactory.setVersioningDelay(Double.parseDouble(delay));
         }

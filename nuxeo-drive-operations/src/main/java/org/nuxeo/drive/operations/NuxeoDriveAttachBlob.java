@@ -60,10 +60,11 @@ public class NuxeoDriveAttachBlob {
     @OperationMethod
     public Blob run(Blob blob) {
         if (applyVersioningPolicy) {
-            FileSystemItemFactory factory = ((FileSystemItemAdapterServiceImpl) Framework.getService(FileSystemItemAdapterService.class)).getFileSystemItemFactory(factoryName);
+            FileSystemItemFactory factory = ((FileSystemItemAdapterServiceImpl) Framework.getService(
+                    FileSystemItemAdapterService.class)).getFileSystemItemFactory(factoryName);
             if (!(factory instanceof VersioningFileSystemItemFactory)) {
-                throw new NuxeoException(String.format("Factory %s must implement VersioningFileSystemItemFactory.",
-                        factoryName));
+                throw new NuxeoException(
+                        String.format("Factory %s must implement VersioningFileSystemItemFactory.", factoryName));
             }
             VersioningFileSystemItemFactory versioningFactory = (VersioningFileSystemItemFactory) factory;
             FileSystemItemHelper.versionIfNeeded(versioningFactory, doc, session);
@@ -71,8 +72,8 @@ public class NuxeoDriveAttachBlob {
 
         BlobHolder bh = doc.getAdapter(BlobHolder.class);
         if (bh == null) {
-            throw new NuxeoException(String.format("Document %s is not a BlobHolder, no blob can be attached to it.",
-                    doc.getId()));
+            throw new NuxeoException(
+                    String.format("Document %s is not a BlobHolder, no blob can be attached to it.", doc.getId()));
         }
         bh.setBlob(blob);
         session.saveDocument(doc);
