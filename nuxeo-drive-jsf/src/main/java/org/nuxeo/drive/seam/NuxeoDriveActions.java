@@ -215,30 +215,7 @@ public class NuxeoDriveActions extends InputController implements Serializable {
             throw new NuxeoException(String.format("Document %s (%s) has no blob, cannot get Drive Edit URL.",
                     currentDocument.getPathAsString(), currentDocument.getId()));
         }
-        String fileName = blob.getFilename();
-        ServletRequest servletRequest = (ServletRequest) FacesContext.getCurrentInstance()
-                                                                     .getExternalContext()
-                                                                     .getRequest();
-        String baseURL = VirtualHostHelper.getBaseURL(servletRequest);
-        StringBuilder sb = new StringBuilder();
-        sb.append(NXDRIVE_PROTOCOL).append("://");
-        sb.append(PROTOCOL_COMMAND_EDIT).append("/");
-        sb.append(baseURL.replaceFirst("://", "/"));
-        sb.append("user/");
-        sb.append(documentManager.getPrincipal().getName());
-        sb.append("/");
-        sb.append("repo/");
-        sb.append(documentManager.getRepositoryName());
-        sb.append("/nxdocid/");
-        sb.append(currentDocument.getId());
-        sb.append("/filename/");
-        String escapedFilename = fileName.replaceAll("(/|\\\\|\\*|<|>|\\?|\"|:|\\|)", "-");
-        sb.append(URIUtils.quoteURIPathComponent(escapedFilename, true));
-        sb.append("/downloadUrl/");
-        DownloadService downloadService = Framework.getService(DownloadService.class);
-        String downloadUrl = downloadService.getDownloadUrl(currentDocument, DownloadService.BLOBHOLDER_0, "");
-        sb.append(downloadUrl);
-        return sb.toString();
+        return getDriveEditURL(currentDocument, blob, null);
     }
 
     public String getDriveEditURL(DocumentModel doc, String xPath) {
@@ -253,6 +230,14 @@ public class NuxeoDriveActions extends InputController implements Serializable {
         }
         Blob blob = (Blob) obj;
 
+        return getDriveEditURL(doc, blob, xPath);
+    }
+
+    public String getDriveEditURL(DocumentModel doc, Blob blob, String xPath) {
+        if (doc == null || blob == null) {
+            return null;
+        }
+
         String editURL = "%s://%s/%suser/%s/repo/%s/nxdocid/%s/filename/%s/downloadUrl/%s";
         ServletRequest servletRequest = (ServletRequest) FacesContext.getCurrentInstance()
                                                                      .getExternalContext()
@@ -266,6 +251,9 @@ public class NuxeoDriveActions extends InputController implements Serializable {
         filename = filename.replaceAll("(/|\\\\|\\*|<|>|\\?|\"|:|\\|)", "-");
         filename = URIUtils.quoteURIPathComponent(filename, true);
         DownloadService downloadService = Framework.getService(DownloadService.class);
+        if (xPath == null) {
+            xPath = DownloadService.BLOBHOLDER_0;
+        }
         String downloadUrl = downloadService.getDownloadUrl(doc, xPath, filename);
 
         StringBuilder sb = new StringBuilder();

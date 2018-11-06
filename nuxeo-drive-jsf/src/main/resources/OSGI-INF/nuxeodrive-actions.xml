@@ -32,7 +32,7 @@
       order="200" label="command.driveEdit" type="bare_link" icon="/icons/drive_edit.png">
       <category>BLOB_ACTIONS</category>
       <filter-id>has_one_auth_token</filter-id>
-      <filter-id>can_drive_edit_all</filter-id>
+      <filter-id>can_drive_edit_any</filter-id>
     </action>
 
     <action id="driveEditListing" link="#{nuxeoDriveActions.getDriveEditURL(actionContextDocument)}"
@@ -103,7 +103,7 @@
       </rule>
     </filter>
 
-    <filter id="can_drive_edit_all">
+    <filter id="can_drive_edit_any">
       <rule grant="true">
         <condition>#{nuxeoDriveActions.canEditBlob(document, blobXPath)}</condition>
       </rule>
