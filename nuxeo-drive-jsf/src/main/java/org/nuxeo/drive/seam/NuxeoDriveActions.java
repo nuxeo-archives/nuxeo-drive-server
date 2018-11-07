@@ -25,7 +25,6 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.Formatter;
 import java.util.List;
 import java.util.Set;
 
@@ -59,8 +58,8 @@ import org.nuxeo.ecm.core.api.IdRef;
 import org.nuxeo.ecm.core.api.NuxeoException;
 import org.nuxeo.ecm.core.api.NuxeoPrincipal;
 import org.nuxeo.ecm.core.api.blobholder.BlobHolder;
-import org.nuxeo.ecm.core.api.blobholder.DocumentBlobHolder;
 import org.nuxeo.ecm.core.api.impl.DocumentModelListImpl;
+import org.nuxeo.ecm.core.api.model.impl.primitives.BlobProperty;
 import org.nuxeo.ecm.core.api.security.SecurityConstants;
 import org.nuxeo.ecm.core.io.download.DownloadService;
 import org.nuxeo.ecm.platform.web.common.vh.VirtualHostHelper;
@@ -160,7 +159,7 @@ public class NuxeoDriveActions extends InputController implements Serializable {
     }
 
     public boolean canEditBlob(DocumentModel doc, String xPath) {
-        return canEditDocument(doc) && doc.getPropertyValue(xPath) instanceof Blob;
+        return canEditDocument(doc) && doc.getProperty(xPath) instanceof BlobProperty;
     }
 
     public boolean hasOneDriveToken(NuxeoPrincipal user) throws UnsupportedEncodingException {
@@ -222,6 +221,7 @@ public class NuxeoDriveActions extends InputController implements Serializable {
         if (doc == null) {
             return null;
         }
+
         Object obj = doc.getPropertyValue(xPath);
         if (!(obj instanceof Blob)) {
             throw new NuxeoException(String.format(
@@ -256,10 +256,8 @@ public class NuxeoDriveActions extends InputController implements Serializable {
         }
         String downloadUrl = downloadService.getDownloadUrl(doc, xPath, filename);
 
-        StringBuilder sb = new StringBuilder();
-        Formatter fmt = new Formatter(sb);
-        fmt.format(editURL, NXDRIVE_PROTOCOL, PROTOCOL_COMMAND_EDIT, baseURL, user, repo, docId, filename, downloadUrl);
-        return sb.toString();
+        return String.format(
+            editURL, NXDRIVE_PROTOCOL, PROTOCOL_COMMAND_EDIT, baseURL, user, repo, docId, filename, downloadUrl);
     }
 
     public String navigateToUserCenterNuxeoDrive() {
