@@ -159,7 +159,7 @@ public class NuxeoDriveActions extends InputController implements Serializable {
     }
 
     public boolean canEditBlob(DocumentModel doc, String xPath) {
-        return canEditDocument(doc) && doc.getProperty(xPath) instanceof BlobProperty;
+        return canEditDocument(doc) && doc.getPropertyValue(xPath) instanceof Blob;
     }
 
     public boolean hasOneDriveToken(NuxeoPrincipal user) throws UnsupportedEncodingException {
