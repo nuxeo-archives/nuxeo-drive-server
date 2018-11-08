@@ -20,7 +20,6 @@ package org.nuxeo.drive.seam;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
@@ -142,16 +141,14 @@ public class TestNuxeoDriveActions {
         doc = session.createDocument(doc);
 
         String mainBlobURL = nuxeoDriveActions.getDriveEditURL(doc);
-        assertNotNull(mainBlobURL);
         String expectedMainBlobURL = String.format(
             "nxdrive://edit/http/localhost:8080/nuxeo/user/Administrator/repo/test/nxdocid/%s/filename/bla.odt/downloadUrl/nxfile/test/%s/blobholder:0/bla.odt", doc.getId(), doc.getId());
-        assertEquals(mainBlobURL, expectedMainBlobURL);
+        assertEquals(expectedMainBlobURL, mainBlobURL);
 
         String secondBlobURL = nuxeoDriveActions.getDriveEditURL(doc, "files:files/0/file");
-        assertNotNull(secondBlobURL);
         String expectedSecondBlobURL = String.format(
             "nxdrive://edit/http/localhost:8080/nuxeo/user/Administrator/repo/test/nxdocid/%s/filename/bli.odt/downloadUrl/nxfile/test/%s/files:files/0/file/bli.odt", doc.getId(), doc.getId());
-        assertEquals(secondBlobURL, expectedSecondBlobURL);
+        assertEquals(expectedSecondBlobURL, secondBlobURL);
 
         try {
             String invalidXPath = nuxeoDriveActions.getDriveEditURL(doc, "files:files/1/file");
