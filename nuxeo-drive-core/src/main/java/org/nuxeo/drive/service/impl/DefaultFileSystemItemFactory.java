@@ -137,16 +137,22 @@ public class DefaultFileSystemItemFactory extends AbstractFileSystemItemFactory
                     doc::getId, () -> e);
             return false;
         }
-        // Check Folderish or BlobHolder with a blob
-        if (!doc.isFolder() && blob == null) {
-            log.debug(
-                    "Document {} is not Folderish nor a BlobHolder with a blob, it cannot be adapted as a FileSystemItem.",
-                    doc::getId);
-            return false;
-        }
 
-        // Check for blobs backed by extended blob providers (ex: Google Drive)
         if (!doc.isFolder()) {
+            // Check Folderish or BlobHolder with a blob in the binary store
+            if (blob == null) {
+                log.debug(
+                        "Document {} is not Folderish nor a BlobHolder with a blob, it cannot be adapted as a FileSystemItem.",
+                        doc::getId);
+                return false;
+            } else if (blob.getDigest() == "notInBinaryStore") {
+                log.debug(
+                        "Document {} is not Folderish nor does it have a blob in the binary store, it cannot be adapted as a FileSystemItem.",
+                        doc::getId);
+                return false;
+            }
+
+            // Check for blobs backed by extended blob providers (ex: Google Drive)
             BlobManager blobManager = Framework.getService(BlobManager.class);
             BlobProvider blobProvider = blobManager.getBlobProvider(blob);
             if (blobProvider != null
