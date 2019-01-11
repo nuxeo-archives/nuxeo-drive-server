@@ -138,16 +138,11 @@ public class DefaultFileSystemItemFactory extends AbstractFileSystemItemFactory
             return false;
         }
 
+        // Check Folderish or BlobHolder with a blob
         if (!doc.isFolder()) {
-            // Check Folderish or BlobHolder with a blob in the binary store
             if (blob == null) {
                 log.debug(
                         "Document {} is not Folderish nor a BlobHolder with a blob, it cannot be adapted as a FileSystemItem.",
-                        doc::getId);
-                return false;
-            } else if (blob.getDigest() == "notInBinaryStore") {
-                log.debug(
-                        "Document {} is not Folderish nor does it have a blob in the binary store, it cannot be adapted as a FileSystemItem.",
                         doc::getId);
                 return false;
             }
@@ -159,6 +154,11 @@ public class DefaultFileSystemItemFactory extends AbstractFileSystemItemFactory
                     && (!blobProvider.supportsUserUpdate() || blobProvider.getBinaryManager() == null)) {
                 log.debug(
                         "Blob for Document {} is backed by a BlobProvider preventing updates, it cannot be adapted as a FileSystemItem.",
+                        doc::getId);
+                return false;
+            } else if (blobProvider == null && !doc.getType().equals("Note")) {
+                log.debug(
+                        "Document {} has no BlobProvider and is not a Note, it cannot be adapted as a FileSystemItem.",
                         doc::getId);
                 return false;
             }
