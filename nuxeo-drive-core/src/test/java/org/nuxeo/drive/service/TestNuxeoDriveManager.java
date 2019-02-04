@@ -34,8 +34,10 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.LogEvent;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -67,6 +69,7 @@ import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
+import org.nuxeo.runtime.test.runner.LogCaptureFeature;
 import org.nuxeo.runtime.test.runner.TransactionalFeature;
 
 /**
@@ -75,8 +78,9 @@ import org.nuxeo.runtime.test.runner.TransactionalFeature;
  * @author <a href="mailto:ogrise@nuxeo.com">Olivier Grisel</a>
  */
 @RunWith(FeaturesRunner.class)
-@Features(NuxeoDriveFeature.class)
+@Features({NuxeoDriveFeature.class, LogCaptureFeature.class})
 @RepositoryConfig(init = DefaultRepositoryInit.class)
+@LogCaptureFeature.FilterWith(TestNuxeoDriveManager.CustomLogFilter.class)
 public class TestNuxeoDriveManager {
 
     private static final Logger log = LogManager.getLogger(TestNuxeoDriveManager.class);
@@ -108,6 +112,9 @@ public class TestNuxeoDriveManager {
     @Inject
     protected TrashService trashService;
 
+    @Inject
+    LogCaptureFeature.Result capturedLog;
+
     protected CoreSession user1Session;
 
     protected CoreSession user2Session;
@@ -123,6 +130,13 @@ public class TestNuxeoDriveManager {
     protected DocumentModel folder_1_1;
 
     protected DocumentModel folder_2_1;
+
+    public static class CustomLogFilter implements LogCaptureFeature.Filter {
+        @Override
+        public boolean accept(LogEvent event) {
+            return Level.ERROR.equals(event.getLevel());
+        }
+    }
 
     @Before
     public void createUserSessionsAndFolders() throws Exception {
@@ -611,6 +625,14 @@ public class TestNuxeoDriveManager {
 
         // Check the version is filtered among the synchronization roots
         assertFalse(nuxeoDriveManager.isSynchronizationRoot(session.getPrincipal(), version));
+    }
+
+    @Test
+    public void testGetSyncRootsWithPlacelessDocument() {
+        DocumentModel placelessDoc = session.createDocument(user1Session.createDocumentModel(null, "file_1", "File"));
+        setPermissions(placelessDoc, new ACE("user2", SecurityConstants.READ));
+        // Testing if an error is logged because the listener fails without throwing an exception to the caller
+        assertTrue(capturedLog.getCaughtEvents().isEmpty());
     }
 
     protected DocumentModel doc(CoreSession session, String path) {
