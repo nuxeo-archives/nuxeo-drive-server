@@ -34,10 +34,8 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.LogEvent;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -129,13 +127,6 @@ public class TestNuxeoDriveManager {
     protected DocumentModel folder_1_1;
 
     protected DocumentModel folder_2_1;
-
-    public static class CustomLogFilter implements LogCaptureFeature.Filter {
-        @Override
-        public boolean accept(LogEvent event) {
-            return Level.ERROR.equals(event.getLevel());
-        }
-    }
 
     @Before
     public void createUserSessionsAndFolders() throws Exception {
