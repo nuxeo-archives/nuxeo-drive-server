@@ -80,7 +80,6 @@ import org.nuxeo.runtime.test.runner.TransactionalFeature;
 @RunWith(FeaturesRunner.class)
 @Features({NuxeoDriveFeature.class, LogCaptureFeature.class})
 @RepositoryConfig(init = DefaultRepositoryInit.class)
-@LogCaptureFeature.FilterWith(TestNuxeoDriveManager.CustomLogFilter.class)
 public class TestNuxeoDriveManager {
 
     private static final Logger log = LogManager.getLogger(TestNuxeoDriveManager.class);
@@ -113,7 +112,7 @@ public class TestNuxeoDriveManager {
     protected TrashService trashService;
 
     @Inject
-    LogCaptureFeature.Result capturedLog;
+    protected LogCaptureFeature.Result capturedLog;
 
     protected CoreSession user1Session;
 
@@ -628,6 +627,7 @@ public class TestNuxeoDriveManager {
     }
 
     @Test
+    @LogCaptureFeature.FilterOn(logLevel = "ERROR")
     public void testGetSyncRootsWithPlacelessDocument() {
         DocumentModel placelessDoc = session.createDocument(user1Session.createDocumentModel(null, "file_1", "File"));
         setPermissions(placelessDoc, new ACE("user2", SecurityConstants.READ));
